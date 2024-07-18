@@ -1,0 +1,133 @@
+<html>
+
+<head>
+  <title>静岡県沼津市 建築物モデル（MVT）</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src='https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.js'></script>
+  <link href='https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.css' rel='stylesheet' />
+  <script src="https://unpkg.com/pmtiles@2.11.0/dist/index.js"></script>
+  <script src="https://unpkg.com/deck.gl@8.9.0/dist.min.js"></script>
+  <script src="https://unpkg.com/@loaders.gl/3d-tiles@^2.3.0/dist/dist.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script type="text/javascript">
+    // addProtocolの設定
+    let protocol = new pmtiles.Protocol();
+    maplibregl.addProtocol('pmtiles', (request) => {
+      return new Promise((resolve, reject) => {
+        const callback = (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ data });
+          }
+        };
+        protocol.tile(request, callback);
+      });
+    });
+
+    // マップの初期化
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: './std.json',
+      // style: 'https://tile.openstreetmap.jp/styles/osm-bright-ja/style.json',
+      hash: true,
+      zoom: 16.5,
+      center: [138.858642, 35.102764],
+      pitch: 67,
+      maxPitch: 85,
+      bearing: 28.9,
+      attributionControl: false,
+    })
+
+    // ズーム・回転
+    map.addControl(new maplibregl.NavigationControl());
+
+    // フルスクリーンモードのオンオフ
+    map.addControl(new maplibregl.FullscreenControl());
+
+    // 現在位置表示
+    map.addControl(new maplibregl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: false
+      },
+      fitBoundsOptions: { maxZoom: 18 },
+      trackUserLocation: true,
+      showUserLocation: true
+    }));
+
+    // スケール表示
+    map.addControl(new maplibregl.ScaleControl({
+      maxWidth: 200,
+      unit: 'metric'
+    }));
+
+    // Attributionを折りたたみ表示
+    map.addControl(new maplibregl.AttributionControl({
+      compact: true
+    }));
+
+    // 3D地形コントロール表示
+    map.addControl(
+      new maplibregl.TerrainControl({
+        source: 'aist-dem-terrain-rgb',
+        exaggeration: 1 // 標高を強調する倍率
+      })
+    );
+
+    map.on('load', () => {
+      // 標高タイルソース
+      map.addSource("aist-dem-terrain-rgb", {
+        type: 'raster-dem',
+        tiles: ['https://gsj-seamless.jp/seamless/elev/php/terrainRGB.php?url='
+          + 'https://tiles.gsj.jp/tiles/elev/mixed/{z}/{y}/{x}.png',
+        ],
+        attribution: '<a href="https://tiles.gsj.jp/tiles/elev/tiles.html" target="_blank">産総研 シームレス標高タイル(統合DEM)</a>',
+        tileSize: 256,
+        maxzoom: 17
+      });
+
+      // 標高タイルセット
+      map.setTerrain({ 'source': 'aist-dem-terrain-rgb', 'exaggeration': 1 });
+
+      // 建築物モデル（MVT）ソース
+      map.addSource("numazushi-bldg", {
+        type: 'vector',
+        // tiles: ['http://localhost:8000/mvt-bldg/{z}/{x}/{y}.pbf'],
+        tiles: ['https://public-data.geolonia.com/kaken-3dmap-2024/mvt-bldg-demo/{z}/{x}/{y}.pbf'],
+        minzoom: 8,
+        maxzoom: 15,
+        attribution: '<a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2023" target="_blank">3D都市モデル（Project PLATEAU）沼津市（2023年度）</a>'
+      });
+
+      //  建築物モデル（MVT）レイヤ
+      map.addLayer({
+        id: "numazushi-bldg",
+        source: "numazushi-bldg",
+        "source-layer": "bldg:Building",
+        type: "fill-extrusion",
+        paint: {
+          "fill-extrusion-color": "#FFFFFF",
+          "fill-extrusion-opacity": 1,
+          "fill-extrusion-height": ["get", "measuredHeight"],
+        }
+      });
+
+    })
+  </script>
+</body>
+
+</html>
