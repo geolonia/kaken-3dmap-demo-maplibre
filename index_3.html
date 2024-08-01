@@ -78,7 +78,7 @@
     // Attributionを折りたたみ表示
     map.addControl(new maplibregl.AttributionControl({
       compact: true,
-      customAttribution: '<a href="https://www.geospatial.jp/ckan/dataset/plateau" target="_blank">3D都市モデル（Project PLATEAU）建築物モデル</a>'
+      customAttribution: '<a href="https://www.geospatial.jp/ckan/dataset/plateau-22203-numazu-shi-2023" target="_blank">3D都市モデル（Project PLATEAU）沼津市（2023年度）</a>'
     }));
 
     /*
@@ -121,7 +121,7 @@
             pointCloud: false,
             onTileLoad: d => {
               const { content } = d;
-              content.cartographicOrigin.z -= 40.4423 + 8.7;
+              content.cartographicOrigin.z -= 40.4420 + 8.5;
             }
           })
         ]
