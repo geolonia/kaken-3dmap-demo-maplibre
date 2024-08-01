@@ -80,6 +80,7 @@
       compact: true
     }));
 
+    /*
     // 3D地形コントロール表示
     map.addControl(
       new maplibregl.TerrainControl({
@@ -87,8 +88,10 @@
         exaggeration: 1 // 標高を強調する倍率
       })
     );
+    */
 
     map.on('load', () => {
+      /*
       // 標高タイルソース
       map.addSource("aist-dem-terrain-rgb", {
         type: 'raster-dem',
@@ -102,6 +105,7 @@
 
       // 標高タイルセット
       map.setTerrain({ 'source': 'aist-dem-terrain-rgb', 'exaggeration': 1 });
+      */
 
       // 建築物モデル（MVT）ソース
       map.addSource("numazushi-bldg", {
